@@ -1,0 +1,58 @@
+0: program -> PROGRAM ID ( identifier_list ) ; declarations subprogram_declarations compound_statement 
+1: identifier_list -> ID identifier_list_p 
+2: identifier_list_p -> , ID identifier_list_p 
+3: identifier_list_p -> eps 
+4: declarations -> declarations_p 
+5: declarations_p -> VAR identifier_list : type ; declarations_p 
+6: declarations_p -> eps 
+7: type -> standard_type 
+8: type -> ARRAY [ num .. num ] OF standard_type 
+9: standard_type -> integer 
+10: standard_type -> real 
+11: subprogram_declarations -> subprogram_declarations_p 
+12: subprogram_declarations_p -> subprogram_declaration ; subprogram_declarations_p 
+13: subprogram_declarations_p -> eps 
+14: subprogram_declaration -> subprogram_head declarations compound_statement 
+15: subprogram_head -> FUNCTION ID arguments : standard_type ; 
+16: subprogram_head -> PROCEDURE ID arguments ; 
+17: arguments -> ( parameter_list ) 
+18: arguments -> eps 
+19: parameter_list -> identifier_list : type parameter_list_p 
+20: parameter_list_p -> ; identifier_list : type parameter_list_p 
+21: parameter_list_p -> eps 
+22: compound_statement -> begin optional_statements end 
+23: optional_statements -> statement_list 
+24: optional_statements -> eps 
+25: statement_list -> statement statement_list_p 
+26: statement_list_p -> ; statement statement_list_p 
+27: statement_list_p -> eps 
+28: statement -> ID statement_tail 
+29: statement -> compound_statement 
+30: statement -> IF expression THEN statement ELSE statement 
+31: statement -> WHILE expression DO statement 
+32: statement_tail -> variable_prime := expression 
+33: statement_tail -> procedure_statement_prime 
+34: variable_prime -> [ expression ] 
+35: variable_prime -> eps 
+36: procedure_statement_prime -> ( expression_list ) 
+37: procedure_statement_prime -> eps 
+38: expression_list -> expression expression_list_p 
+39: expression_list_p -> , expression expression_list_p 
+40: expression_list_p -> eps 
+41: expression -> simple_expression expression_prime 
+42: expression_prime -> relop simple_expression 
+43: expression_prime -> eps 
+44: simple_expression -> term simple_expression_p 
+45: simple_expression -> sign term simple_expression_p 
+46: simple_expression_p -> addop term simple_expression_p 
+47: simple_expression_p -> eps 
+48: term -> factor term_p 
+49: term_p -> mulop factor term_p 
+50: term_p -> eps 
+51: factor -> ID factor_id_tail 
+52: factor -> num 
+53: factor -> ( expression ) 
+54: factor -> not factor 
+55: factor_id_tail -> ( expression_list ) 
+56: factor_id_tail -> eps 
+57: sign -> addop 

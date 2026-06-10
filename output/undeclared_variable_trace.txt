@@ -1,0 +1,375 @@
+
+
+##################################################
+SOURCE FILE: test/undeclared_variable.pascal
+##################################################
+
+========================================
+LEXICAL ANALYZER
+========================================
+Token         Lexeme            Line    Column
+------------------------------------------------
+PROGRAM       program           1       1
+ID            UndeclaredTest    1       9
+(             (                 1       23
+ID            input             1       24
+,             ,                 1       29
+ID            output            1       31
+)             )                 1       37
+;             ;                 1       38
+VAR           var               2       1
+ID            x                 3       3
+:             :                 3       5
+integer       integer           3       7
+;             ;                 3       14
+begin         begin             4       1
+ID            x                 5       3
+:=            :=                5       5
+num           1                 5       8
+;             ;                 5       9
+ID            y                 6       3
+:=            :=                6       5
+ID            x                 6       8
+addop         +                 6       10
+num           2                 6       12
+;             ;                 6       13
+end           end               7       1
+.             .                 7       4
+$             $                 8       1
+No errors reported.
+
+========================================
+RECURSIVE DESCENT PARSER
+========================================
+-> program
+  match(PROGRAM) OK, got program
+  match(ID) OK, got UndeclaredTest
+[Scope 0] Enter
+[Scope 0] insert UndeclaredTest : function, void, line 1
+  match(() OK, got (
+  -> identifier_list
+    match(ID) OK, got input
+    -> identifier_list_p
+      match(,) OK, got ,
+      match(ID) OK, got output
+      -> identifier_list_p
+      <- identifier_list_p
+    <- identifier_list_p
+  <- identifier_list
+  match()) OK, got )
+  match(;) OK, got ;
+  -> declarations
+    match(VAR) OK, got var
+    match(ID) OK, got x
+    match(:) OK, got :
+    match(integer) OK, got integer
+    match(;) OK, got ;
+[Scope 0] insert x : variable, integer, line 3
+    -> declarations_p
+    <- declarations_p
+  <- declarations
+  -> subprogram_declarations
+  <- subprogram_declarations
+  -> compound_statement
+[Scope 1] Enter
+    match(begin) OK, got begin
+    -> block_declarations
+    <- block_declarations
+    -> optional_statements
+      -> statement_list
+        -> statement
+          match(ID) OK, got x
+[Scope 1] lookup x -> found at scope 0
+          -> statement_tail
+            -> variable_prime
+            <- variable_prime
+            match(:=) OK, got :=
+            -> expression
+              -> simple_expression
+                -> term
+                  -> factor
+                    match(num) OK, got 1
+                  <- factor
+                  -> term_p
+                  <- term_p
+                <- term
+                -> simple_expression_p
+                <- simple_expression_p
+              <- simple_expression
+              -> expression_prime
+              <- expression_prime
+            <- expression
+          <- statement_tail
+        <- statement
+        -> statement_list_p
+          match(;) OK, got ;
+          -> statement
+            match(ID) OK, got y
+ERROR line 6: undeclared variable 'y'
+            -> statement_tail
+              -> variable_prime
+              <- variable_prime
+              match(:=) OK, got :=
+              -> expression
+                -> simple_expression
+                  -> term
+                    -> factor
+                      match(ID) OK, got x
+[Scope 1] lookup x -> found at scope 0
+                      -> factor_id_tail
+                      <- factor_id_tail
+                    <- factor
+                    -> term_p
+                    <- term_p
+                  <- term
+                  -> simple_expression_p
+                    match(addop) OK, got +
+                    -> term
+                      -> factor
+                        match(num) OK, got 2
+                      <- factor
+                      -> term_p
+                      <- term_p
+                    <- term
+                    -> simple_expression_p
+                    <- simple_expression_p
+                  <- simple_expression_p
+                <- simple_expression
+                -> expression_prime
+                <- expression_prime
+              <- expression
+            <- statement_tail
+          <- statement
+          -> statement_list_p
+            match(;) OK, got ;
+          <- statement_list_p
+        <- statement_list_p
+      <- statement_list
+    <- optional_statements
+    match(end) OK, got end
+[Scope 1] Exit, dump:
++-----+----------------+-----------+---------+-------+------+--------+
+| ID  | Name           | Kind      | Type    | Scope | Line | Offset |
++-----+----------------+-----------+---------+-------+------+--------+
+| --  | <empty>        | --        | --      | 1     | --   | --     |
++-----+----------------+-----------+---------+-------+------+--------+
+  <- compound_statement
+  match(.) OK, got .
+<- program
+[Scope 0] Exit, dump:
++-----+----------------+-----------+---------+-------+------+--------+
+| ID  | Name           | Kind      | Type    | Scope | Line | Offset |
++-----+----------------+-----------+---------+-------+------+--------+
+| 1   | UndeclaredTest | function  | void    |     0 |    1 |      0 |
+|   2 | x              | variable  | integer |     0 |    3 |      1 |
++-----+----------------+-----------+---------+-------+------+--------+
+RDP RESULT: REJECTED
+Error summary:
+[Semantic] line 6, column 3: undeclared variable 'y'
+
+========================================
+NON-RECURSIVE PREDICTIVE PARSER
+========================================
+Step  Stack                                 Input         Action
+------------------------------------------------------------------------------------------
+1     $ program                             PROGRAM       program -> PROGRAM ID ( identifier_list ) ; declarations subprogram_declarations compound_statement 
+[Scope 0] Enter
+2     $ compound_statement subprogram_d...  PROGRAM       match PROGRAM
+3     $ compound_statement subprogram_d...  ID            match ID
+[Scope 0] insert UndeclaredTest : function, void, line 1
+4     $ compound_statement subprogram_d...  (             match (
+5     $ compound_statement subprogram_d...  ID            identifier_list -> ID identifier_list_p 
+6     $ compound_statement subprogram_d...  ID            match ID
+7     $ compound_statement subprogram_d...  ,             identifier_list_p -> , ID identifier_list_p 
+8     $ compound_statement subprogram_d...  ,             match ,
+9     $ compound_statement subprogram_d...  ID            match ID
+10    $ compound_statement subprogram_d...  )             identifier_list_p -> eps 
+11    $ compound_statement subprogram_d...  )             match )
+12    $ compound_statement subprogram_d...  ;             match ;
+13    $ compound_statement subprogram_d...  VAR           declarations -> VAR identifier_list : type ; declarations_p 
+14    $ compound_statement subprogram_d...  VAR           match VAR
+15    $ compound_statement subprogram_d...  ID            identifier_list -> ID identifier_list_p 
+16    $ compound_statement subprogram_d...  ID            match ID
+17    $ compound_statement subprogram_d...  :             identifier_list_p -> eps 
+[Scope 0] insert x : variable, unknown, line 3
+18    $ compound_statement subprogram_d...  :             match :
+19    $ compound_statement subprogram_d...  integer       type -> standard_type 
+20    $ compound_statement subprogram_d...  integer       standard_type -> integer 
+21    $ compound_statement subprogram_d...  integer       match integer
+22    $ compound_statement subprogram_d...  ;             match ;
+23    $ compound_statement subprogram_d...  begin         declarations_p -> eps 
+24    $ compound_statement subprogram_d...  begin         subprogram_declarations -> eps 
+25    $ compound_statement                  begin         compound_statement -> begin block_declarations optional_statements end 
+[Scope 1] Enter
+26    $ @scope_end end optional_stateme...  begin         match begin
+27    $ @scope_end end optional_stateme...  ID            block_declarations -> eps 
+28    $ @scope_end end optional_stateme...  ID            optional_statements -> statement_list 
+29    $ @scope_end end statement_list       ID            statement_list -> statement statement_list_p 
+30    $ @scope_end end statement_list_p...  ID            statement -> ID statement_tail 
+31    $ @scope_end end statement_list_p...  ID            match ID
+[Scope 1] lookup x -> found at scope 0
+32    $ @scope_end end statement_list_p...  :=            statement_tail -> variable_prime := expression 
+33    $ @scope_end end statement_list_p...  :=            variable_prime -> eps 
+34    $ @scope_end end statement_list_p...  :=            match :=
+35    $ @scope_end end statement_list_p...  num           expression -> simple_expression expression_prime 
+36    $ @scope_end end statement_list_p...  num           simple_expression -> term simple_expression_p 
+37    $ @scope_end end statement_list_p...  num           term -> factor term_p 
+38    $ @scope_end end statement_list_p...  num           factor -> num 
+39    $ @scope_end end statement_list_p...  num           match num
+40    $ @scope_end end statement_list_p...  ;             term_p -> eps 
+41    $ @scope_end end statement_list_p...  ;             simple_expression_p -> eps 
+42    $ @scope_end end statement_list_p...  ;             expression_prime -> eps 
+43    $ @scope_end end statement_list_p     ;             statement_list_p -> ; statement_list_p2 
+44    $ @scope_end end statement_list_p...  ;             match ;
+45    $ @scope_end end statement_list_p2    ID            statement_list_p2 -> statement statement_list_p 
+46    $ @scope_end end statement_list_p...  ID            statement -> ID statement_tail 
+47    $ @scope_end end statement_list_p...  ID            match ID
+ERROR line 6: undeclared variable 'y'
+48    $ @scope_end end statement_list_p...  :=            statement_tail -> variable_prime := expression 
+49    $ @scope_end end statement_list_p...  :=            variable_prime -> eps 
+50    $ @scope_end end statement_list_p...  :=            match :=
+51    $ @scope_end end statement_list_p...  ID            expression -> simple_expression expression_prime 
+52    $ @scope_end end statement_list_p...  ID            simple_expression -> term simple_expression_p 
+53    $ @scope_end end statement_list_p...  ID            term -> factor term_p 
+54    $ @scope_end end statement_list_p...  ID            factor -> ID factor_id_tail 
+55    $ @scope_end end statement_list_p...  ID            match ID
+[Scope 1] lookup x -> found at scope 0
+56    $ @scope_end end statement_list_p...  addop         factor_id_tail -> eps 
+57    $ @scope_end end statement_list_p...  addop         term_p -> eps 
+58    $ @scope_end end statement_list_p...  addop         simple_expression_p -> addop term simple_expression_p 
+59    $ @scope_end end statement_list_p...  addop         match addop
+60    $ @scope_end end statement_list_p...  num           term -> factor term_p 
+61    $ @scope_end end statement_list_p...  num           factor -> num 
+62    $ @scope_end end statement_list_p...  num           match num
+63    $ @scope_end end statement_list_p...  ;             term_p -> eps 
+64    $ @scope_end end statement_list_p...  ;             simple_expression_p -> eps 
+65    $ @scope_end end statement_list_p...  ;             expression_prime -> eps 
+66    $ @scope_end end statement_list_p     ;             statement_list_p -> ; statement_list_p2 
+67    $ @scope_end end statement_list_p...  ;             match ;
+68    $ @scope_end end statement_list_p2    end           statement_list_p2 -> eps 
+69    $ @scope_end end                      end           match end
+[Scope 1] Exit, dump:
++-----+----------------+-----------+---------+-------+------+--------+
+| ID  | Name           | Kind      | Type    | Scope | Line | Offset |
++-----+----------------+-----------+---------+-------+------+--------+
+| --  | <empty>        | --        | --      | 1     | --   | --     |
++-----+----------------+-----------+---------+-------+------+--------+
+70    $                                     $             ACCEPT
+[Scope 0] Exit, dump:
++-----+----------------+-----------+---------+-------+------+--------+
+| ID  | Name           | Kind      | Type    | Scope | Line | Offset |
++-----+----------------+-----------+---------+-------+------+--------+
+| 1   | UndeclaredTest | function  | void    |     0 |    1 |      0 |
+|   2 | x              | variable  | unknown |     0 |    3 |      1 |
++-----+----------------+-----------+---------+-------+------+--------+
+PREDICTIVE RESULT: ACCEPTED
+Error summary:
+[Semantic] line 6, column 3: undeclared variable 'y'
+
+========================================
+LR PARSER
+========================================
+Step  States              Input               Action
+--------------------------------------------------------------------------------
+1     0                   PROGRAM ID ( ID , ID ) ; VAR ID : integer ; begin ID := num ; ID := ID addop num ; end $ $shift 1
+[Scope 0] Enter
+2     0 1                 ID ( ID , ID ) ; VAR ID : integer ; begin ID := num ; ID := ID addop num ; end $ $shift 3
+3     0 1 3               ( ID , ID ) ; VAR ID : integer ; begin ID := num ; ID := ID addop num ; end $ $shift 4
+4     0 1 3 4             ID , ID ) ; VAR ID : integer ; begin ID := num ; ID := ID addop num ; end $ $shift 5
+5     0 1 3 4 5           , ID ) ; VAR ID : integer ; begin ID := num ; ID := ID addop num ; end $ $shift 7
+6     0 1 3 4 5 7         ID ) ; VAR ID : integer ; begin ID := num ; ID := ID addop num ; end $ $shift 10
+7     0 1 3 4 5 7 10      ) ; VAR ID : integer ; begin ID := num ; ID := ID addop num ; end $ $reduce by [identifier_list_p -> ]
+8     0 1 3 4 5 7 10 12   ) ; VAR ID : integer ; begin ID := num ; ID := ID addop num ; end $ $reduce by [identifier_list_p -> , ID identifier_list_p ]
+9     0 1 3 4 5 8         ) ; VAR ID : integer ; begin ID := num ; ID := ID addop num ; end $ $reduce by [identifier_list -> ID identifier_list_p ]
+10    0 1 3 4 6           ) ; VAR ID : integer ; begin ID := num ; ID := ID addop num ; end $ $shift 9
+11    0 1 3 4 6 9         ; VAR ID : integer ; begin ID := num ; ID := ID addop num ; end $ $shift 11
+12    0 1 3 4 6 9 11      VAR ID : integer ; begin ID := num ; ID := ID addop num ; end $ $shift 13
+13    0 1 3 4 6 9 11 13   ID : integer ; begin ID := num ; ID := ID addop num ; end $ $shift 15
+14    0 1 3 4 6 9 11 13 15 : integer ; begin ID := num ; ID := ID addop num ; end $ $reduce by [identifier_list_p -> ]
+15    0 1 3 4 6 9 11 13 15 23 : integer ; begin ID := num ; ID := ID addop num ; end $ $reduce by [identifier_list -> ID identifier_list_p ]
+16    0 1 3 4 6 9 11 13 16 : integer ; begin ID := num ; ID := ID addop num ; end $ $shift 24
+17    0 1 3 4 6 9 11 13 16 24 integer ; begin ID := num ; ID := ID addop num ; end $ $shift 34
+18    0 1 3 4 6 9 11 13 16 24 34 ; begin ID := num ; ID := ID addop num ; end $ $reduce by [standard_type -> integer ]
+19    0 1 3 4 6 9 11 13 16 24 36 ; begin ID := num ; ID := ID addop num ; end $ $reduce by [type -> standard_type ]
+20    0 1 3 4 6 9 11 13 16 24 37 ; begin ID := num ; ID := ID addop num ; end $ $shift 50
+21    0 1 3 4 6 9 11 13 16 24 37 50 begin ID := num ; ID := ID addop num ; end $ $reduce by [declarations_p -> ]
+22    0 1 3 4 6 9 11 13 16 24 37 50 68 begin ID := num ; ID := ID addop num ; end $ $reduce by [declarations -> VAR identifier_list : type ; declarations_p ]
+[Scope 0] insert x : variable, integer, line 3
+23    0 1 3 4 6 9 11 14   begin ID := num ; ID := ID addop num ; end $ $reduce by [subprogram_declarations -> ]
+24    0 1 3 4 6 9 11 14 20 begin ID := num ; ID := ID addop num ; end $ $shift 28
+[Scope 1] Enter
+25    0 1 3 4 6 9 11 14 20 28 ID := num ; ID := ID addop num ; end $ $reduce by [block_declarations -> ]
+26    0 1 3 4 6 9 11 14 20 28 44 ID := num ; ID := ID addop num ; end $ $shift 57
+27    0 1 3 4 6 9 11 14 20 28 44 57 := num ; ID := ID addop num ; end $ $reduce by [variable_prime -> ]
+28    0 1 3 4 6 9 11 14 20 28 44 57 79 := num ; ID := ID addop num ; end $ $shift 133
+29    0 1 3 4 6 9 11 14 20 28 44 57 79 133 num ; ID := ID addop num ; end $ $shift 208
+30    0 1 3 4 6 9 11 14 20 28 44 57 79 133 208 ; ID := ID addop num ; end $ $reduce by [factor -> num ]
+31    0 1 3 4 6 9 11 14 20 28 44 57 79 133 206 ; ID := ID addop num ; end $ $reduce by [term_p -> ]
+32    0 1 3 4 6 9 11 14 20 28 44 57 79 133 206 295 ; ID := ID addop num ; end $ $reduce by [term -> factor term_p ]
+33    0 1 3 4 6 9 11 14 20 28 44 57 79 133 211 ; ID := ID addop num ; end $ $reduce by [simple_expression_p -> ]
+34    0 1 3 4 6 9 11 14 20 28 44 57 79 133 211 301 ; ID := ID addop num ; end $ $reduce by [simple_expression -> term simple_expression_p ]
+35    0 1 3 4 6 9 11 14 20 28 44 57 79 133 210 ; ID := ID addop num ; end $ $reduce by [expression_prime -> ]
+36    0 1 3 4 6 9 11 14 20 28 44 57 79 133 210 298 ; ID := ID addop num ; end $ $reduce by [expression -> simple_expression expression_prime ]
+37    0 1 3 4 6 9 11 14 20 28 44 57 79 133 205 ; ID := ID addop num ; end $ $reduce by [statement_tail -> variable_prime := expression ]
+38    0 1 3 4 6 9 11 14 20 28 44 57 78 ; ID := ID addop num ; end $ $reduce by [statement -> ID statement_tail ]
+[Scope 1] lookup x -> found at scope 0
+39    0 1 3 4 6 9 11 14 20 28 44 63 ; ID := ID addop num ; end $ $shift 101
+40    0 1 3 4 6 9 11 14 20 28 44 63 101 ID := ID addop num ; end $ $shift 57
+41    0 1 3 4 6 9 11 14 20 28 44 63 101 57 := ID addop num ; end $ $reduce by [variable_prime -> ]
+42    0 1 3 4 6 9 11 14 20 28 44 63 101 57 79 := ID addop num ; end $ $shift 133
+43    0 1 3 4 6 9 11 14 20 28 44 63 101 57 79 133 ID addop num ; end $ $shift 204
+44    0 1 3 4 6 9 11 14 20 28 44 63 101 57 79 133 204 addop num ; end $ $ reduce by [factor_id_tail -> ]
+45    0 1 3 4 6 9 11 14 20 28 44 63 101 57 79 133 204 293 addop num ; end $ $ reduce by [factor -> ID factor_id_tail ]
+[Scope 1] lookup x -> found at scope 0
+46    0 1 3 4 6 9 11 14 20 28 44 63 101 57 79 133 206 addop num ; end $ $ reduce by [term_p -> ]
+47    0 1 3 4 6 9 11 14 20 28 44 63 101 57 79 133 206 295 addop num ; end $ $ reduce by [term -> factor term_p ]
+48    0 1 3 4 6 9 11 14 20 28 44 63 101 57 79 133 211 addop num ; end $ $ shift 300
+49    0 1 3 4 6 9 11 14 20 28 44 63 101 57 79 133 211 300 num ; end $ $       shift 208
+50    0 1 3 4 6 9 11 14 20 28 44 63 101 57 79 133 211 300 208 ; end $ $           reduce by [factor -> num ]
+51    0 1 3 4 6 9 11 14 20 28 44 63 101 57 79 133 211 300 206 ; end $ $           reduce by [term_p -> ]
+52    0 1 3 4 6 9 11 14 20 28 44 63 101 57 79 133 211 300 206 295 ; end $ $           reduce by [term -> factor term_p ]
+53    0 1 3 4 6 9 11 14 20 28 44 63 101 57 79 133 211 300 389 ; end $ $           reduce by [simple_expression_p -> ]
+54    0 1 3 4 6 9 11 14 20 28 44 63 101 57 79 133 211 300 389 443 ; end $ $           reduce by [simple_expression_p -> addop term simple_expression_p ]
+55    0 1 3 4 6 9 11 14 20 28 44 63 101 57 79 133 211 301 ; end $ $           reduce by [simple_expression -> term simple_expression_p ]
+56    0 1 3 4 6 9 11 14 20 28 44 63 101 57 79 133 210 ; end $ $           reduce by [expression_prime -> ]
+57    0 1 3 4 6 9 11 14 20 28 44 63 101 57 79 133 210 298 ; end $ $           reduce by [expression -> simple_expression expression_prime ]
+58    0 1 3 4 6 9 11 14 20 28 44 63 101 57 79 133 205 ; end $ $           reduce by [statement_tail -> variable_prime := expression ]
+59    0 1 3 4 6 9 11 14 20 28 44 63 101 57 78 ; end $ $           reduce by [statement -> ID statement_tail ]
+ERROR line 6: undeclared variable 'y'
+60    0 1 3 4 6 9 11 14 20 28 44 63 101 167 ; end $ $           shift 101
+61    0 1 3 4 6 9 11 14 20 28 44 63 101 167 101 end $ $             reduce by [statement_list_p2 -> ]
+62    0 1 3 4 6 9 11 14 20 28 44 63 101 167 101 168 end $ $             reduce by [statement_list_p -> ; statement_list_p2 ]
+63    0 1 3 4 6 9 11 14 20 28 44 63 101 167 257 end $ $             reduce by [statement_list_p2 -> statement statement_list_p ]
+64    0 1 3 4 6 9 11 14 20 28 44 63 101 168 end $ $             reduce by [statement_list_p -> ; statement_list_p2 ]
+65    0 1 3 4 6 9 11 14 20 28 44 63 102 end $ $             reduce by [statement_list -> statement statement_list_p ]
+66    0 1 3 4 6 9 11 14 20 28 44 64 end $ $             reduce by [optional_statements -> statement_list ]
+67    0 1 3 4 6 9 11 14 20 28 44 62 end $ $             shift 100
+68    0 1 3 4 6 9 11 14 20 28 44 62 100 $ $                 reduce by [compound_statement -> begin block_declarations optional_statements end ]
+[Scope 1] Exit, dump:
++-----+----------------+-----------+---------+-------+------+--------+
+| ID  | Name           | Kind      | Type    | Scope | Line | Offset |
++-----+----------------+-----------+---------+-------+------+--------+
+| --  | <empty>        | --        | --      | 1     | --   | --     |
++-----+----------------+-----------+---------+-------+------+--------+
+69    0 1 3 4 6 9 11 14 20 29 $ $                 reduce by [program -> PROGRAM ID ( identifier_list ) ; declarations subprogram_declarations compound_statement ]
+[Scope 0] insert UndeclaredTest : function, void, line 1
+70    0 2                 $ $                 ACCEPT
+LR PARSER RESULT: ACCEPTED
+[Scope 0] Exit, dump:
++-----+----------------+-----------+---------+-------+------+--------+
+| ID  | Name           | Kind      | Type    | Scope | Line | Offset |
++-----+----------------+-----------+---------+-------+------+--------+
+| 1   | x              | variable  | integer |     0 |    3 |      0 |
+|   2 | UndeclaredTest | function  | void    |     0 |    1 |      1 |
++-----+----------------+-----------+---------+-------+------+--------+
+Error summary:
+[Semantic] line 6, column 3: undeclared variable 'y'
+
+
+PROJECT COMBINATION STATUS
+- Lexer: wired from earlier scanner work, now returns token/lexeme/line/column.
+- Recursive descent parser: wired from week 9 grammar.
+- Predictive parser: wired from week 10 LL(1) table approach with panic-mode recovery.
+- Symbol table: integrated into parser actions for declarations and uses.
+- LR parser: canonical LR(1) shift-reduce parser with action/goto tables and panic-mode recovery.
+- Error handler: collects syntax and semantic diagnostics.

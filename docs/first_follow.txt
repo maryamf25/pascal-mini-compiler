@@ -1,0 +1,34 @@
+FIRST/FOLLOW SETS
+arguments                   FIRST={ ( eps } FOLLOW={ : ; }
+compound_statement          FIRST={ begin } FOLLOW={ $ ; ELSE end }
+declarations                FIRST={ VAR eps } FOLLOW={ FUNCTION PROCEDURE begin }
+declarations_p              FIRST={ VAR eps } FOLLOW={ FUNCTION PROCEDURE begin }
+expression                  FIRST={ ( ID addop not num } FOLLOW={ ) , ; DO ELSE THEN ] end }
+expression_list             FIRST={ ( ID addop not num } FOLLOW={ ) }
+expression_list_p           FIRST={ , eps } FOLLOW={ ) }
+expression_prime            FIRST={ eps relop } FOLLOW={ ) , ; DO ELSE THEN ] end }
+factor                      FIRST={ ( ID not num } FOLLOW={ ) , ; DO ELSE THEN ] addop end mulop relop }
+factor_id_tail              FIRST={ ( eps } FOLLOW={ ) , ; DO ELSE THEN ] addop end mulop relop }
+identifier_list             FIRST={ ID } FOLLOW={ ) : }
+identifier_list_p           FIRST={ , eps } FOLLOW={ ) : }
+optional_statements         FIRST={ ID IF WHILE begin eps } FOLLOW={ end }
+parameter_list              FIRST={ ID } FOLLOW={ ) }
+parameter_list_p            FIRST={ ; eps } FOLLOW={ ) }
+procedure_statement_prime   FIRST={ ( eps } FOLLOW={ ; ELSE end }
+program                     FIRST={ PROGRAM } FOLLOW={ $ }
+sign                        FIRST={ addop } FOLLOW={ ( ID not num }
+simple_expression           FIRST={ ( ID addop not num } FOLLOW={ ) , ; DO ELSE THEN ] end relop }
+simple_expression_p         FIRST={ addop eps } FOLLOW={ ) , ; DO ELSE THEN ] end relop }
+standard_type               FIRST={ integer real } FOLLOW={ ) ; }
+statement                   FIRST={ ID IF WHILE begin } FOLLOW={ ; ELSE end }
+statement_list              FIRST={ ID IF WHILE begin } FOLLOW={ end }
+statement_list_p            FIRST={ ; eps } FOLLOW={ end }
+statement_tail              FIRST={ ( := [ eps } FOLLOW={ ; ELSE end }
+subprogram_declaration      FIRST={ FUNCTION PROCEDURE } FOLLOW={ ; }
+subprogram_declarations     FIRST={ FUNCTION PROCEDURE eps } FOLLOW={ begin }
+subprogram_declarations_p   FIRST={ FUNCTION PROCEDURE eps } FOLLOW={ begin }
+subprogram_head             FIRST={ FUNCTION PROCEDURE } FOLLOW={ VAR begin }
+term                        FIRST={ ( ID not num } FOLLOW={ ) , ; DO ELSE THEN ] addop end relop }
+term_p                      FIRST={ eps mulop } FOLLOW={ ) , ; DO ELSE THEN ] addop end relop }
+type                        FIRST={ ARRAY integer real } FOLLOW={ ) ; }
+variable_prime              FIRST={ [ eps } FOLLOW={ := }

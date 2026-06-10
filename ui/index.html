@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mini Compiler Dashboard</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="shell">
+    <header class="hero">
+      <div>
+        <div class="eyebrow">Mini Compiler</div>
+        <h1>Compiler Dashboard</h1>
+        <p>Run a sample or custom Pascal program and inspect every compiler step in separate panes.</p>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel controls">
+        <div class="panel-title">Run Program</div>
+        <label class="field-label" for="sampleSelect">Sample test</label>
+        <div class="row">
+          <select id="sampleSelect"></select>
+          <button id="loadSample">Load</button>
+          <button id="runSample" class="primary">Run sample</button>
+        </div>
+        <div class="stacked-block">
+          <div class="subpanel-title">Sample code preview</div>
+          <textarea id="samplePreview" class="preview-box" readonly spellcheck="false"></textarea>
+        </div>
+        <div class="stacked-block">
+          <div class="subpanel-title">Custom test</div>
+          <textarea id="editor" spellcheck="false"></textarea>
+          <div class="row">
+            <button id="runCustom" class="primary">Run custom</button>
+            <button id="resetEditor">Reset sample</button>
+          </div>
+          <p class="helper-text compact">Write any Pascal source here, then run it with the compiler.</p>
+        </div>
+      </section>
+
+      <section class="panel output">
+        <div class="panel-title">Compiler Output</div>
+        <div id="statusBar" class="status idle">Idle</div>
+        <div class="tabbar">
+          <button class="tab active" data-tab="trace">Trace</button>
+          <button class="tab" data-tab="ast">AST Tree</button>
+          <button class="tab" data-tab="final">Final Results</button>
+          <button class="tab" data-tab="docs">Docs</button>
+        </div>
+        <div class="tabview active" id="traceView"></div>
+        <div class="tabview" id="astView">
+           <div id="ast-visual-container" style="padding: 20px; font-family: 'Consolas', monospace;"></div>
+        </div>
+        <pre class="tabview" id="rawView"></pre>
+        <div class="tabview final-view" id="finalView"></div>
+        <div class="tabview docs-view" id="docsView">
+          <div class="docs-tabbar">
+            <button class="docs-tab active" data-doc-tab="pipeline">Pipeline Flow</button>
+            <button class="docs-tab" data-doc-tab="grammar">Grammar</button>
+            <button class="docs-tab" data-doc-tab="firstfollow">FIRST / FOLLOW Table</button>
+            <button class="docs-tab" data-doc-tab="ll1">LL(1) Table</button>
+            <button class="docs-tab" data-doc-tab="lr">LR Table</button>
+            <button class="docs-tab" data-doc-tab="integration">Integration</button>
+          </div>
+          <div class="docs-tabview active" id="pipelineView">
+            <div class="pipeline-flow-container">
+              <div class="flow-node source">Pascal Source File<small>Raw code input</small></div>
+              <div class="flow-arrow-down"></div>
+              
+              <div class="flow-node lexer">Lexical Analyzer<small>Generates Token Stream</small></div>
+              <div class="flow-arrow-down"></div>
+              
+              <div class="flow-node semantic">Semantic Analyzer<small>Validates Types & Scopes (Symbol Table)</small></div>
+              <div class="flow-arrow-down"></div>
+              
+              <div class="flow-row">
+                <div class="flow-node parser">Recursive Descent Parser<small>Builds AST</small></div>
+                <div class="flow-node parser">Predictive LL(1) Parser<small>Table-driven Panic Mode</small></div>
+                <div class="flow-node parser">Canonical LR(1) Parser<small>Shift/Reduce LALR/LR</small></div>
+              </div>
+              <div class="flow-arrow-down"></div>
+              
+              <div class="flow-node handler">Error Handler<small>Aggregates Semantic & Syntax Diagnostics</small></div>
+            </div>
+          </div>
+          <div class="docs-tabview" id="grammarView">
+            <div id="grammarText"></div>
+          </div>
+          <div class="docs-tabview" id="firstfollowView">
+            <div id="firstFollowText"></div>
+          </div>
+          <div class="docs-tabview" id="ll1View">
+            <div id="ll1Text"></div>
+          </div>
+          <div class="docs-tabview" id="lrView">
+            <div id="lrText"></div>
+          </div>
+          <div class="docs-tabview" id="integrationView">
+            <pre id="integrationText"></pre>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>
