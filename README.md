@@ -1,4 +1,4 @@
-# CS-471L Mini Compiler
+# Pascal Mini Compiler
 
 A fully integrated compiler for a custom Pascal-like language, featuring a Lexical Analyzer, Semantic Analyzer, Recursive Descent Parser (AST builder), Predictive LL(1) Parser, and a Canonical LR(1) Parser.
 
