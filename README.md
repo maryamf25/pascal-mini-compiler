@@ -79,4 +79,4 @@ To launch the dashboard:
 4. Open your web browser and go to:
    **http://localhost:8000**
 
-From the dashboard, you can click **"Run sample"** or write code in the editor and click **"Run custom"**. Explore the **Trace**, **AST Tree**, **Final Results**, and **Docs** tabs!
+From the dashboard, you can click **"Run sample"** or write code in the editor and click **"Run custom"**. Explore the **Trace**, **AST Tree**, **Final Results**, and **Docs** tabs.
